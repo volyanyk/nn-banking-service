@@ -1,0 +1,69 @@
+### Customers - POST
+POST http://localhost:8080/api/v1/customers
+Content-Type: application/json
+
+{
+  "firstName": "Sam {{$random.alphabetic(5)}}",
+  "lastName": "Doe {{$random.alphabetic(6)}}",
+  "email": "{{$random.email}}",
+  "initialBalance": "100"
+}
+
+
+
+### Customers GET
+GET http://localhost:8080/api/v1/customers
+
+
+### Customers GET
+GET http://localhost:8080/api/v1/customers/1
+
+
+### NBP API
+GET https://api.nbp.pl/api/exchangerates/rates/a/usd
+Content-Type: application/json
+
+
+### Notificaiton API POST
+POST http://localhost:8082/api/v1/notification
+Content-Type: application/json
+
+{
+"toCustomerId": 1,
+"toCustomerName": "2",
+"message" : "{{$random.alphabetic(6)}}"
+}
+
+### Accounts - get by customer
+###
+GET http://localhost:8084/api/v1/accounts/1
+
+
+### Accounts - get by customer incl params
+###
+GET http://localhost:8084/api/v1/accounts/1?currency=USD
+
+### Accounts - get by customer
+###
+GET http://localhost:8084/api/v1/accounts/1
+
+
+### Accounts - create new account (currency account)
+POST http://localhost:8084/api/v1/accounts/1
+Content-Type: application/json
+
+{
+  "currency": "USD",
+  "initialBalance": "1"
+}
+
+
+### Accounts - buy currency
+PUT http://localhost:8084/api/v1/accounts/1
+Content-Type: application/json
+
+{
+  "fromId": "2",
+  "toId": "1",
+  "volume": "7"
+}
