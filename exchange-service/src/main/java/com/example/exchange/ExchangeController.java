@@ -1,36 +1,25 @@
-package com.example.customer;
+package com.example.exchange;
 
-import com.example.customer.model.CustomerDataResponse;
-import com.example.customer.model.CustomerRegistrationRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.math.BigDecimal;
 
 @Slf4j
 @RestController
-@RequestMapping("api/v1/customers")
+@RequestMapping("api/v1/exchange")
 @AllArgsConstructor
-public class CustomerController {
+public class ExchangeController {
 
-    private final CustomerService customerService;
+    private final ExchangeService exchangeService;
 
-    @PostMapping
-    public void registerCustomer(@RequestBody CustomerRegistrationRequest customerRegistrationRequest) {
-        log.info("new customer registration {}", customerRegistrationRequest);
-        customerService.registerCustomer(customerRegistrationRequest);
-    }
-    @GetMapping
-    public ResponseEntity<List<Integer>> getCustomers() {
+
+    @GetMapping("/{currency}")
+    public ResponseEntity<BigDecimal> getByCurrency(@PathVariable String currency) {
         log.info("get customer ids");
-        List<Integer> customerIds = customerService.getCustomers();
-        return ResponseEntity.ok(customerIds);
-    }
-    @GetMapping(path = "{customerId}")
-    public ResponseEntity<CustomerDataResponse> getCustomer(@PathVariable("customerId") Integer customerId) {
-        log.info("get customer id by id {}", customerId);
-        return ResponseEntity.ok(customerService.getCustomerById(customerId));
+        BigDecimal val = exchangeService.getByCurrency(currency);
+        return ResponseEntity.ok(val);
     }
 }

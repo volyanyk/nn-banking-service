@@ -1,6 +1,6 @@
-package com.amigoscode.notification;
+package com.example.notifier;
 
-import com.amigoscode.clients.notification.NotificationRequest;
+import com.example.mq.client.notification.NewNotificationRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,7 +17,7 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @PostMapping
-    public void sendNotification(@RequestBody NotificationRequest notificationRequest) {
+    public void sendNotification(@RequestBody NewNotificationRequest notificationRequest) {
         log.info("New notification... {}", notificationRequest);
         notificationService.send(notificationRequest);
     }

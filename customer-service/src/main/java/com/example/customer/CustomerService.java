@@ -1,49 +1,58 @@
-package com.amigoscode.customer;
+package com.example.customer;
 
-import com.amigoscode.amqp.RabbitMQMessageProducer;
-import com.amigoscode.clients.fraud.FraudCheckResponse;
-import com.amigoscode.clients.fraud.FraudClient;
-import com.amigoscode.clients.notification.NotificationClient;
-import com.amigoscode.clients.notification.NotificationRequest;
+
+import com.example.api.exception.ResourceNotFoundException;
+import com.example.common.domain.valueobject.CustomerId;
+import com.example.customer.domain.CustomerDomain;
+import com.example.customer.domain.CustomerDomainService;
+import com.example.customer.exception.IncorrectCustomerInputDataException;
+import com.example.customer.model.CustomerDataResponse;
+import com.example.customer.model.CustomerRegistrationRequest;
+import com.example.mq.producer.RabbitMQMessageProducer;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @AllArgsConstructor
 public class CustomerService {
 
     private final CustomerRepository customerRepository;
-    private final FraudClient fraudClient;
-    private final RabbitMQMessageProducer rabbitMQMessageProducer;
+    private final CustomerDomainService customerDomainService;
 
-    public void registerCustomer(CustomerRegistrationRequest request) {
-        Customer customer = Customer.builder()
-                .firstName(request.firstName())
-                .lastName(request.lastName())
-                .email(request.email())
-                .build();
-        // todo: check if email valid
-        // todo: check if email not taken
-        customerRepository.saveAndFlush(customer);
+    public CustomerDataResponse registerCustomer(CustomerRegistrationRequest request) {
+        CustomerDomain customerDomain = customerDomainService.registerCustomer(
+                request.firstName(),
+                request.lastName(),
+                request.email(),
+                request.initialBalance());
+        return new CustomerDataResponse(
+                customerDomain.getId().getValue(),
+                customerDomain.getFirstName(),
+                customerDomain.getLastName(),
+                customerDomain.getEmail());
+    }
 
-        FraudCheckResponse fraudCheckResponse =
-                fraudClient.isFraudster(customer.getId());
-
-        if (fraudCheckResponse.isFraudster()) {
-            throw new IllegalStateException("fraudster");
+    public List<Integer> getCustomers() {
+        return customerRepository.findAll()
+                .stream()
+                .map(Customer::getId)
+        .toList();
+    }
+    public CustomerDataResponse getCustomerById(final Integer id) {
+        if(Objects.isNull(id)){
+            throw new IncorrectCustomerInputDataException();
         }
-
-        NotificationRequest notificationRequest = new NotificationRequest(
-                customer.getId(),
-                customer.getEmail(),
-                String.format("Hi %s, welcome to Amigoscode...",
-                        customer.getFirstName())
-        );
-        rabbitMQMessageProducer.publish(
-                notificationRequest,
-                "internal.exchange",
-                "internal.notification.routing-key"
-        );
-
+        return customerRepository.findById(id)
+                .map(customer ->
+                        new CustomerDataResponse(
+                                id,
+                                customer.getFirstName(),
+                                customer.getLastName(),
+                                customer.getEmail()))
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("The customer with the id " + id + " was not found."));
     }
 }

@@ -1,17 +1,14 @@
-package com.amigoscode.notification;
+package com.example.notifier;
 
-import com.amigoscode.amqp.RabbitMQMessageProducer;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 
 @SpringBootApplication(
         scanBasePackages = {
-                "com.amigoscode.notification",
-                "com.amigoscode.amqp",
+                "com.example.notifier",
+                "com.example.mq.producer",
         }
 )
 @PropertySources({
@@ -22,18 +19,4 @@ public class NotificationApplication {
         SpringApplication.run(NotificationApplication.class, args);
     }
 
-//    @Bean
-//    CommandLineRunner commandLineRunner(
-//            RabbitMQMessageProducer producer,
-//            NotificationConfig notificationConfig
-//            ) {
-//        return args -> {
-//            producer.publish(
-//                    new Person("Ali", 18),
-//                    notificationConfig.getInternalExchange(),
-//                    notificationConfig.getInternalNotificationRoutingKey());
-//        };
-//    }
-//
-//    record Person(String name, int age){}
 }

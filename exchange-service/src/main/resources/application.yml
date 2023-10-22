@@ -1,11 +1,11 @@
 server:
-    port: 8080
+    port: 8081
 spring:
     application:
-        name: customer
+        name: exchange
     datasource:
         password: password
-        url: jdbc:postgresql://localhost:5432/customer
+        url: jdbc:postgresql://localhost:5432/exchange
         username: admin
     jpa:
         hibernate:
@@ -15,8 +15,6 @@ spring:
                 dialect: org.hibernate.dialect.PostgreSQLDialect
                 format_sql: true
         show-sql: true
-    rabbitmq:
-        addresses: localhost:5672
     profiles:
         active: default
 eureka:
@@ -26,4 +24,6 @@ eureka:
         fetch-registry: true
         register-with-eureka: true
         enabled: true
+api:
+    nbp-url: https://api.nbp.pl
 

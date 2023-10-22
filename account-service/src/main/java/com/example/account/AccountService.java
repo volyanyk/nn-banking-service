@@ -1,77 +1,99 @@
-package com.example.customer;
+package com.example.account;
 
 
+import com.example.account.domain.AccountDomain;
+import com.example.account.domain.AccountDomainService;
+import com.example.account.model.*;
 import com.example.api.exception.ResourceNotFoundException;
-import com.example.customer.exception.IncorrectCustomerInputDataException;
-import com.example.customer.model.CustomerDataResponse;
-import com.example.customer.model.CustomerRegistrationRequest;
+import com.example.common.domain.valueobject.AccountId;
+import com.example.common.domain.valueobject.CustomerId;
+import com.example.mq.client.account.AccountRequest;
 import com.example.mq.client.account.AccountType;
-import com.example.mq.client.account.NewAccountRequest;
-import com.example.mq.client.notification.NewNotificationRequest;
-import com.example.mq.producer.RabbitMQMessageProducer;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+
 
 @Service
 @AllArgsConstructor
-public class CustomerService {
+public class AccountService {
 
-    private final CustomerRepository customerRepository;
-    private final RabbitMQMessageProducer rabbitMQMessageProducer;
+    private final AccountRepository accountRepository;
+    private final AccountDomainService accountDomainService;
 
-    public void registerCustomer(CustomerRegistrationRequest request) {
-        Customer customer = Customer.builder()
-                .firstName(request.firstName())
-                .lastName(request.lastName())
-                .email(request.email())
-                .build();
-        customerRepository.saveAndFlush(customer);
-        NewAccountRequest accountRequest = new NewAccountRequest(
-                customer.getId(),
-                request.initialBalance(),
-                AccountType.PLN
-
-        );
-        rabbitMQMessageProducer.publish(accountRequest,
-                "internal.exchange",
-                "internal.account.routing-key");
-
-
-        NewNotificationRequest notificationRequest = new NewNotificationRequest(
-                customer.getId(),
-                customer.getEmail(),
-                String.format("Hi Mr/Mrs %s, welcome to our bank!",
-                        customer.getFirstName())
-        );
-        rabbitMQMessageProducer.publish(
-                notificationRequest,
-                "internal.exchange",
-                "internal.notification.routing-key"
-        );
-
+    public BalanceResponse createAccount(Integer customerId, OpenAccountRequest request) {
+        AccountDomain accountDomain = accountDomainService.create(
+                new CustomerId(customerId),
+                AccountType.valueOf(request.currency()),
+                request.initialBalance());
+        return new BalanceResponse(
+                Collections.singletonList(
+                new Balance(accountDomain.getId().getValue(),
+                        accountDomain.getBalance(),
+                        accountDomain.getType().name())));
     }
 
-    public List<Integer> getCustomers() {
-        return customerRepository.findAll()
-                .stream()
-                .map(Customer::getId)
-        .toList();
+    public BalanceResponse transfer(Integer customerId, TransferRequest transferRequest) {
+        List<AccountDomain> accountDomains = accountDomainService.transfer(
+                new CustomerId(customerId),
+                transferRequest.fromId(),
+                transferRequest.toId(),
+                transferRequest.volume());
+        return new BalanceResponse(accountDomains.stream()
+                .map(account ->
+                        new Balance(account.getId().getValue(), account.getBalance(), account.getType().name())).toList());
     }
-    public CustomerDataResponse getCustomerById(final Integer id) {
-        if(Objects.isNull(id)){
-            throw new IncorrectCustomerInputDataException();
-        }
-        return customerRepository.findById(id)
-                .map(customer ->
-                        new CustomerDataResponse(
-                                id,
-                                customer.getFirstName(),
-                                customer.getLastName(),
-                                customer.getEmail()))
-                .orElseThrow(() ->
-                        new ResourceNotFoundException("The customer with the id " + id + " was not found."));
+
+    public BalanceResponse getBalanceByCurrency(Integer customerId, String currency) {
+        final Optional<Account> byCustomerIdAndType = accountRepository.findByCustomerIdAndType(customerId, AccountType.valueOf(currency));
+        return byCustomerIdAndType.map(account ->
+                new BalanceResponse(
+                        Collections.singletonList(
+                                new Balance(account.getId(), account.getBalance(), account.getType().name())))).orElseThrow(() ->
+                        new ResourceNotFoundException("The account for the customer id "
+                                + customerId +
+                                " and currency "
+                                + currency +
+                                " was not found."));
+    }
+
+    public BalanceResponse getBalance(Integer customerId) {
+        final List<Account> byCustomerId = accountRepository.findByCustomerId(customerId);
+        return new BalanceResponse(byCustomerId.stream()
+                .map(account ->
+                        new Balance(account.getId(), account.getBalance(), account.getType().name())).toList());
+    }
+
+    public BalanceResponse getBalanceById(Integer customerId, Integer accountId) {
+        final Optional<Account> byId = accountRepository.findByIdAndCustomerId(accountId, customerId);
+        return byId.map(account ->
+                new BalanceResponse(
+                        Collections.singletonList(
+                                new Balance(account.getId(), account.getBalance(), account.getType().name())))).orElseThrow(() ->
+                new ResourceNotFoundException("The account for the id "
+                        + byId +
+                        " was not found."));
+    }
+
+    public BalanceResponse getBalanceByCurrencyAndId(Integer customerId, String currency, Integer id) {
+        final Optional<Account> byId = accountRepository.findByIdAndCustomerIdAndType(id, customerId, AccountType.valueOf(currency));
+        return byId.map(account ->
+                new BalanceResponse(
+                        Collections.singletonList(
+                                new Balance(account.getId(), account.getBalance(), account.getType().name())))).orElseThrow(() ->
+                new ResourceNotFoundException("The account for the id "
+                        + byId +
+                        " was not found."));
+    }
+
+    public void createInitialAccount(AccountRequest accountRequest) {
+        accountDomainService.create(
+                new CustomerId(accountRequest.customerId()),
+                AccountType.valueOf(accountRequest.type().name()),
+                accountRequest.initialBalance());
     }
 }

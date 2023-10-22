@@ -1,2 +1,6 @@
-package com.example.mq.client.account;public enum AccountType {
+package com.example.mq.client.account;
+
+public enum AccountType {
+    PLN, USD
+
 }

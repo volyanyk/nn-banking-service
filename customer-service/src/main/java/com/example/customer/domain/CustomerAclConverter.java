@@ -1,4 +1,4 @@
-package com.example.account.domain;
+package com.example.customer.domain;
 
 import com.example.common.domain.valueobject.AccountId;
 import com.example.common.domain.valueobject.CustomerId;
@@ -8,12 +8,9 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 
 @Component
-public class AccountAclConverter {
+public class CustomerAclConverter {
 
-    public AccountDomain create(CustomerId customerId, AccountType type, BigDecimal initialBalance) {
-        return new AccountDomain(null, customerId, type, initialBalance);
-    }
-    public AccountDomain build(AccountId accountId, CustomerId customerId, AccountType type, BigDecimal initialBalance) {
-        return new AccountDomain(accountId, customerId, type, initialBalance);
+    public CustomerDomain create(String firstName, String lastName, String email) {
+        return new CustomerDomain(null, firstName, lastName, email);
     }
 }

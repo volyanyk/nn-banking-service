@@ -1,2 +1,6 @@
-package com.example.account.model;public record BalanceResponse() {
+package com.example.account.model;
+
+import java.util.List;
+
+public record BalanceResponse(List<Balance> balanceList) {
 }

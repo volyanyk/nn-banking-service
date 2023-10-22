@@ -1,5 +1,6 @@
-package com.example.notifier;
+package com.example.account;
 
+import com.example.mq.client.account.AccountRequest;
 import com.example.mq.client.notification.NewNotificationRequest;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,13 +10,13 @@ import org.springframework.stereotype.Component;
 @Component
 @AllArgsConstructor
 @Slf4j
-public class NotificationConsumer {
+public class AccountConsumer {
 
-    private final NotificationService notificationService;
+    private final AccountService accountService;
 
-    @RabbitListener(queues = "${rabbitmq.queues.notification}")
-    public void consumer(NewNotificationRequest notificationRequest) {
-        log.info("Consumed {} from queue", notificationRequest);
-        notificationService.send(notificationRequest);
+    @RabbitListener(queues = "${rabbitmq.queues.account}")
+    public void consumer(AccountRequest accountRequest) {
+        log.info("Consumed {} from queue", accountRequest);
+        accountService.createInitialAccount(accountRequest);
     }
 }

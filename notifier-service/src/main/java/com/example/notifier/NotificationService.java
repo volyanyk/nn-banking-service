@@ -1,6 +1,6 @@
-package com.amigoscode.notification;
+package com.example.notifier;
 
-import com.amigoscode.clients.notification.NotificationRequest;
+import com.example.mq.client.notification.NewNotificationRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -12,12 +12,12 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
 
-    public void send(NotificationRequest notificationRequest) {
+    public void send(NewNotificationRequest notificationRequest) {
         notificationRepository.save(
                 Notification.builder()
                         .toCustomerId(notificationRequest.toCustomerId())
                         .toCustomerEmail(notificationRequest.toCustomerName())
-                        .sender("Amigoscode")
+                        .sender("Banking service")
                         .message(notificationRequest.message())
                         .sentAt(LocalDateTime.now())
                         .build()

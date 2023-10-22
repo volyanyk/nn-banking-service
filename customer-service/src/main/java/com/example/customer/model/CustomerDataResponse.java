@@ -1,6 +1,7 @@
 package com.example.customer.model;
 
-public record CustomerRegistrationRequest(
+public record CustomerDataResponse(
+        Integer id,
         String firstName,
         String lastName,
         String email) {

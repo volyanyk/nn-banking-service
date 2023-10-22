@@ -12,14 +12,14 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @Slf4j
 @ControllerAdvice
-public class CustomerGlobalExceptionHandler extends GlobalExceptionHandler {
+public class AccountGlobalExceptionHandler extends GlobalExceptionHandler {
 
 
     @ResponseBody
     @ExceptionHandler(value = {DomainException.class})
-    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorDTO handleException(DomainException domainException) {
         log.error(domainException.getMessage(), domainException);
-        return new ErrorDTO(HttpStatus.NOT_FOUND.getReasonPhrase(), domainException.getMessage());
+        return new ErrorDTO(HttpStatus.BAD_REQUEST.getReasonPhrase(), domainException.getMessage());
     }
 }

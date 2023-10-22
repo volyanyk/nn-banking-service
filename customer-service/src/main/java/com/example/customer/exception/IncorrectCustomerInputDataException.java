@@ -1,8 +1,8 @@
 package com.example.customer.exception;
 
-public class IncorrectCustomerInputData extends RuntimeException{
+public class IncorrectCustomerInputDataException extends RuntimeException{
 
-    public IncorrectCustomerInputData() {
+    public IncorrectCustomerInputDataException() {
         super("Incorrect input data");
     }
 }

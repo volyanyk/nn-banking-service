@@ -1,4 +1,4 @@
-package com.example.notifier;
+package com.example.account;
 
 import org.springframework.amqp.core.Binding;
 import org.springframework.amqp.core.BindingBuilder;
@@ -9,16 +9,16 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class NotificationConfig {
+public class AccountConfig {
 
     @Value("${rabbitmq.exchanges.internal}")
     private String internalExchange;
 
-    @Value("${rabbitmq.queues.notification}")
-    private String notificationQueue;
+    @Value("${rabbitmq.queues.account}")
+    private String accountQueue;
 
-    @Value("${rabbitmq.routing-keys.internal-notification}")
-    private String internalNotificationRoutingKey;
+    @Value("${rabbitmq.routing-keys.internal-account}")
+    private String internalAccountRoutingKey;
 
     @Bean
     public TopicExchange internalTopicExchange() {
@@ -27,7 +27,7 @@ public class NotificationConfig {
 
     @Bean
     public Queue notificationQueue() {
-        return new Queue(this.notificationQueue);
+        return new Queue(this.accountQueue);
     }
 
     @Bean
@@ -35,19 +35,18 @@ public class NotificationConfig {
         return BindingBuilder
                 .bind(notificationQueue())
                 .to(internalTopicExchange())
-                .with(this.internalNotificationRoutingKey);
+                .with(this.internalAccountRoutingKey);
     }
-
 
     public String getInternalExchange() {
         return internalExchange;
     }
 
-    public String getNotificationQueue() {
-        return notificationQueue;
+    public String getAccountQueue() {
+        return accountQueue;
     }
 
-    public String getInternalNotificationRoutingKey() {
-        return internalNotificationRoutingKey;
+    public String getInternalAccountRoutingKey() {
+        return internalAccountRoutingKey;
     }
 }

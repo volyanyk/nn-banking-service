@@ -1,14 +1,17 @@
-package com.example.mq.client.account;
+package com.example.mq.client.customer;
 
 import org.springframework.cloud.openfeign.FeignClient;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(
-        name = "account",
-        url = "${clients.account.url}"
+        name = "customer",
+        url = "${clients.customer.url}"
 )
-public interface AccountClient {
+@Service
+public interface CustomerClient {
 
-    @PostMapping("api/v1/account")
-    void newAccount(NewAccountRequest accountRequest);
+    @GetMapping("api/v1/customers/{id}")
+    CustomerDataResponse getCustomerById(@PathVariable Integer id);
 }
